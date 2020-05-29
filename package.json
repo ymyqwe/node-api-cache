@@ -1,0 +1,24 @@
+{
+  "name": "api-cache",
+  "version": "1.0.0",
+  "description": "A solution for nodejs api cache",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ymyqwe/node-api-cache.git"
+  },
+  "keywords": [
+    "nodejs",
+    "cache",
+    "redis"
+  ],
+  "author": "ManiaU",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ymyqwe/node-api-cache/issues"
+  },
+  "homepage": "https://github.com/ymyqwe/node-api-cache#readme"
+}
