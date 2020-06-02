@@ -14,9 +14,13 @@ const NodeApiCache = function NodeApiCache(config) {
       useNodeCache, nodeCacheTime = 10 * 60 * 1000, useRedis, redisConfig, redisCacheTime = 60 * 60 * 3,
     } = config;
     this.redis = null;
+
+    // at least one cache strategy should be configured
     if (!useNodeCache && !useRedis) {
       throw new Error('You should use at least one cache type');
     }
+
+    // mount properties on this
     if (useRedis) {
       this.redis = redisClient(redisConfig);
     }
@@ -30,7 +34,9 @@ const NodeApiCache = function NodeApiCache(config) {
   this.set = (key, value) => {
     if (this.useRedis) {
       let redisValue = value;
-      if (typeof value !== 'string') {
+      // when storing in redis, value
+      // transfer object to string
+      if (typeof value === 'object') {
         redisValue = JSON.stringify(value);
       }
       this.redis.set(key, redisValue, 'EX', this.redisCacheTime);
@@ -40,14 +46,17 @@ const NodeApiCache = function NodeApiCache(config) {
 
   this.get = async (key) => {
     let result = null;
-    if (this.cache.get(key)) {
+
+    if (this.useNodeCache && this.cache.get(key)) {
       result = this.cache.get(key);
       console.log('get local cache', key, result);
       if (result) this.set(key, result);
       return Promise.resolve(result);
     }
+
     if (this.useRedis) {
       result = await this.redis.get(key);
+      // handle stringify object
       try {
         result = JSON.parse(result);
       } catch (error) {
@@ -55,8 +64,10 @@ const NodeApiCache = function NodeApiCache(config) {
       }
       console.log('get redis cache', key, typeof result);
       if (result) this.set(key, result);
+      return result;
     }
-    return result;
+    // return promise
+    return Promise.resolve(result);
   };
 
   this.clearLocalCache = () => {

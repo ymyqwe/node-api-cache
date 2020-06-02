@@ -20,5 +20,10 @@
   "bugs": {
     "url": "https://github.com/ymyqwe/node-api-cache/issues"
   },
-  "homepage": "https://github.com/ymyqwe/node-api-cache#readme"
+  "homepage": "https://github.com/ymyqwe/node-api-cache#readme",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "ioredis": "^4.17.3",
+    "memory-cache": "^0.2.0"
+  }
 }
