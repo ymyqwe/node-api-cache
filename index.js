@@ -41,7 +41,7 @@ const NodeApiCache = function NodeApiCache(config) {
       }
       this.redis.set(key, redisValue, 'EX', this.redisCacheTime);
     }
-    this.cache.put(key, value);
+    this.cache.put(key, value, this.nodeCacheTime);
   };
 
   this.get = async (key) => {

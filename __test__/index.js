@@ -16,7 +16,9 @@ const redisClient = (config) => {
 };
 
 const NodeApiCache = require('../index');
-
+const localCache = new NodeApiCache({ useNodeCache: true, useRedis: false, nodeCacheTime: 60 * 1000});
+const redisCache = new NodeApiCache({ useNodeCache: false, useRedis: true, redisConfig: { uri: 'redis://localhost:6379' } });
+const allCache = new NodeApiCache({ useNodeCache: true, useRedis: true, redisConfig: { uri: 'redis://localhost:6379' } });
 chai.use(sinonChai);
 
 describe('node-api-cache', () => {
@@ -52,6 +54,17 @@ describe('node-api-cache', () => {
   })
 
   describe('set()', () => {
+    it('should allow adding a new item to the local cache', () => {
+      localCache.set('key', 'value');
+    }).to.not.throw()
+    
+    it('should allow adding a new item to the redis cache', () => {
+      redisCache.set('key', 'value');
+    }).to.not.throw()
+
+    it('should allow adding a new item to the all cache', () => {
+      allCache.set('key', 'value');
+    }).to.not.throw()
 
 
   })
@@ -62,7 +75,7 @@ describe('node-api-cache', () => {
   })
 
   describe('clearLocalCache()', () => {
-
+    
   })
 
 });
