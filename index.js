@@ -47,10 +47,10 @@ const NodeApiCache = function NodeApiCache(config) {
   this.get = async (key) => {
     let result = null;
 
-    if (this.useNodeCache && this.cache.get(key)) {
+    if (this.useNodeCache && this.cache.get(key) !== null) {
       result = this.cache.get(key);
       console.log('get local cache', key, result);
-      if (result) this.set(key, result);
+      if (result !== null) this.set(key, result);
       return Promise.resolve(result);
     }
 
@@ -60,10 +60,10 @@ const NodeApiCache = function NodeApiCache(config) {
       try {
         result = JSON.parse(result);
       } catch (error) {
-        console.log('error', error);
+        // console.log('error', error);
       }
-      console.log('get redis cache', key, typeof result);
-      if (result) this.set(key, result);
+      console.log('get redis cache', key, result, typeof result);
+      if (result !== null) this.set(key, result);
       return result;
     }
     // return promise
