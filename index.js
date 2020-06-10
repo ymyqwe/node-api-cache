@@ -49,7 +49,7 @@ const NodeApiCache = function NodeApiCache(config) {
 
     if (this.useNodeCache && this.cache.get(key) !== null) {
       result = this.cache.get(key);
-      console.log('get local cache', key, result);
+      // console.log('get local cache', key, result);
       if (result !== null) this.set(key, result);
       return Promise.resolve(result);
     }
@@ -62,7 +62,7 @@ const NodeApiCache = function NodeApiCache(config) {
       } catch (error) {
         // console.log('error', error);
       }
-      console.log('get redis cache', key, result, typeof result);
+      // console.log('get redis cache', key, result, typeof result);
       if (result !== null) this.set(key, result);
       return result;
     }
@@ -72,7 +72,7 @@ const NodeApiCache = function NodeApiCache(config) {
 
   this.clearLocalCache = () => {
     this.cache.clear();
-    console.log('All node cache cleared');
+    // console.log('All node cache cleared');
   };
 
 

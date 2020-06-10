@@ -1,47 +1,25 @@
 var chai = require('chai'),
-  expect = chai.expect,
-  sinon = require('sinon'),
-  sinonChai = require('sinon-chai'),
-  clock;
-
-const Redis = require('ioredis');
-
-const redisClient = (config) => {
-  if (!config) throw new Error('You should config your redis client');
-  const { keyPrefix = 'node:' } = config;
-  if (config.uri || config.url) {
-    return new Redis(config.uri || config.url, { keyPrefix });
-  }
-  return new Redis(config, { keyPrefix });
-};
+  expect = chai.expect;
 
 const NodeApiCache = require('../index');
 const localCache = new NodeApiCache({ useNodeCache: true, useRedis: false, nodeCacheTime: 1000});
 const redisCache = new NodeApiCache({ useNodeCache: false, useRedis: true, redisConfig: { uri: 'redis://localhost:6379' }, redisCacheTime: 1 });
 const allCache = new NodeApiCache({ useNodeCache: true, useRedis: true, redisConfig: { uri: 'redis://localhost:6379' } });
-chai.use(sinonChai);
 
-function wait(fn, delay) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        fn();
-        resolve();
-      } catch(err) {
-        reject(err);
-      } 
-    }, delay);
-  });
-}
+var wait = (time) => new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve()
+  }, time);
+})
 
 describe('node-api-cache', () => {
   beforeEach(function() {
-    clock = sinon.useFakeTimers();
+    // clock = sinon.useFakeTimers();
 
   });
 
   afterEach(function() {
-    clock.restore();
+    // clock.restore();
   });
 
   describe('set config', () => {
@@ -141,83 +119,77 @@ describe('node-api-cache', () => {
 
     it('should return the corresponding value of a non-expired key in local cache', async () => {
       localCache.set('key', 'value');
-      clock.tick(900);
+      await wait(900);
       const result = await localCache.get('key');
       expect(result).to.equal('value');
     });
 
     it('should refresh the corresponding value of a non-expired key in local cache when revisited', async () => {
       localCache.set('key', 'value');
-      clock.tick(900);
+      await wait(900);
       const result = await localCache.get('key');
       expect(result).to.equal('value');
-      clock.tick(900);
+      await wait(900);
       const result1 = await localCache.get('key');
       expect(result1).to.equal('value');
     });
     
     it('should return null given an expired key', async () => {
       localCache.set('key', 'value');
-      clock.tick(1100);
+      await wait(1100);
       const result = await localCache.get('key')
       expect(result).to.be.null;
     });
 
-    it('should refresh the corresponding value of a non-expired key in local cache when revisited', async () => {
+    it('should refresh the corresponding value of a non-expired key in local cache when revisited', async function () {
+      this.timeout(3000)
       localCache.set('key', 'value');
-      clock.tick(900);
+      await wait(900);
       const result = await localCache.get('key');
       expect(result).to.equal('value');
-      clock.tick(1100);
+      await wait(1100);
       const result1 = await localCache.get('key');
       expect(result1).to.be.null;
     });
 
 
-    it('should return the corresponding value of a non-expired key in redis cache', function (done) {
+    it('should return the corresponding value of a non-expired key in redis cache', async function () {
       this.timeout(2000)
       redisCache.set('key', 'value');
-      // return wait(async () => {
-      //   const result = await redisCache.get('key');
-      //   expect(result).to.equal('value')
-      // }, 1100)
-      // await wait(1);
-      // done()
-      setTimeout(() => {
-        redisCache.get('key').then(result => {
-          console.log('resultttt', result);
-          expect(result).to.equal('value');
-          done()
-        });
-      }, 900);
+
+      await wait(900);
+      const result = await redisCache.get('key');
+      expect(result).to.equal('value');
+
     });
     
-    // it('should refresh the corresponding value of a non-expired key in redis cache when revisited', async () => {
-    //   redisCache.set('key', 'value');
-    //   clock.tick(900);
-    //   const result = await redisCache.get('key');
-    //   expect(result).to.equal('value');
-    //   await clock.tick(900);
-    //   const result1 = await redisCache.get('key');
-    //   expect(result1).to.equal('value');
-    // });
+    it('should refresh the corresponding value of a non-expired key in redis cache when revisited', async () => {
+      redisCache.set('key', 'value');
+      await wait(900);
+      const result = await redisCache.get('key');
+      expect(result).to.equal('value');
+      await wait(900);
+      const result1 = await redisCache.get('key');
+      expect(result1).to.equal('value');
+    });
     
-    // it('should return null given an expired key', async () => {
-    //   redisCache.set('key', 'value');
+    it('should return null given an expired key', async () => {
+      redisCache.set('key', 'value');
+      await wait(1100);
+      const result = await redisCache.get('key')
+      expect(result).to.be.null;
+    });
 
-    //   const result = await redisCache.get('key')
-    //   expect(result).to.be.null;
-    // });
-
-    // it('should refresh the corresponding value of a non-expired key in redis cache when revisited', async () => {
-    //   redisCache.set('key', 'value');
-    //   await clock.tick(900);
-    //   const result = await redisCache.get('key');
-    //   expect(result).to.equal('value');
-    //   await clock.tick(11000);
-    //   const result1 = await redisCache.get('key');
-    //   expect(result1).to.be.null;
-    // });
+    it('should refresh the corresponding value of a non-expired key in redis cache when revisited', async function () {
+      this.timeout(3000);
+      redisCache.set('key', 'value');
+      await wait(900);
+      const result = await redisCache.get('key');
+      expect(result).to.equal('value');
+      await wait(1100);
+      const result1 = await redisCache.get('key');
+      expect(result1).to.be.null;
+    });
   })
 
   describe('clearLocalCache()', () => {
@@ -225,6 +197,15 @@ describe('node-api-cache', () => {
       expect(() => {
         localCache.clearLocalCache();
       }).to.not.throw();
+    })
+
+    it('should clear stored cache', async () => {
+      localCache.set('key', 'value');
+      const result = await localCache.get('key');
+      expect(result).to.equal('value');
+      localCache.clearLocalCache();
+      const result1 = await localCache.get('key');
+      expect(result1).to.be.null;
     })
   })
 
