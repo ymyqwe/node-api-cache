@@ -9,7 +9,7 @@ const redisClient = require('./redis');
   redisCacheTime: the redis cache expires time (in second), default is 3 hours
 */
 const NodeApiCache = function NodeApiCache(config) {
-  this.init = () => {
+  const init = () => {
     const {
       useNodeCache, nodeCacheTime = 10 * 60 * 1000, useRedis, redisConfig, redisCacheTime = 60 * 60 * 3,
     } = config;
@@ -76,7 +76,7 @@ const NodeApiCache = function NodeApiCache(config) {
   };
 
 
-  this.init();
+  init();
 };
 
 
