@@ -1,5 +1,5 @@
 {
-  "name": "api-cache",
+  "name": "node-api-cache",
   "version": "1.0.0",
   "description": "A solution for nodejs api cache",
   "main": "index.js",

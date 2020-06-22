@@ -11,7 +11,7 @@ const NodeApiCache = require('node-api-cache');
 const cacheClient = new NodeApiCache({
   useNodeCache: true, 
   useRedis: true, 
-  redisConfig: { uri: 'redis://localhost:6379' }
+  redisConfig: { uri: 'redis://localhost:6379', keyPrefix: 'node:' }
 })
 
 // set cache will effect both in local cache and redis
@@ -40,7 +40,7 @@ new NodeApiCache({
 * useNodeCache: whether use local node cache;
 * nodeCacheTime: the local cache expired time (in millisecond), default is 10 minutes;
 * useRedis: whether to use redis to store your cache;
-* redisConfig: the redis configuration;
+* redisConfig: the redis configuration; redis client is [ioredis](https://github.com/luin/ioredis); the default <b>keyPrefix</b> is "node:";
 * redisCacheTime: the redis cache expires time (in second), default is 3 hours
 
 ### set 
